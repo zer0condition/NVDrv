@@ -28,6 +28,7 @@ uintptr_t NVDrv::MmGetPhysicalAddress(uintptr_t virtual_address)
 BOOL NVDrv::ReadPhysicalMemory(uintptr_t physical_address, void* OUT res, int size)
 {
 	request_memcpy Request{};
+
 	Request.request_id = NVFunction::phys_read;
 	Request.size = size;
 	Request.dst_addr = (__int64)res;
@@ -257,6 +258,7 @@ uintptr_t NVDrv::GetProcessCR3(uintptr_t base_address)
 	if (!base_address) {
 		return 0;
 	}
+
 	uintptr_t NtdllAddress = reinterpret_cast<uintptr_t>(GetModuleHandleA("ntdll.dll"));
 	if (!NtdllAddress) {
 		return 0;
@@ -277,7 +279,6 @@ uintptr_t NVDrv::GetProcessCR3(uintptr_t base_address)
 
 		if (CR3 == CurrentCR3)
 			continue;
-
 
 		this->SwapReadContext(CR3);
 
