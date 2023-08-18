@@ -50,7 +50,7 @@ int main()
 	printf("SystemCR3: %p\n", (void*)SystemCR3);
 
 	auto ProcessCR3 = NV->GetProcessCR3(ProcessBase);
-	printf("ProcessCR3: %p\n", (void*)SystemCR3);
+	printf("ProcessCR3: %p\n", (void*)ProcessCR3);
 
 	*/
 
