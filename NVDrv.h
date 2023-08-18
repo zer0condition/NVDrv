@@ -24,7 +24,7 @@ public:
 
     BOOL                    ReadVirtualMemory(uintptr_t address, LPVOID output, unsigned long size);
     BOOL                    WriteVirtualMemory(uintptr_t address, LPVOID data, unsigned long size);
-    
+
     BOOL                    SwapReadContext(uintptr_t target_cr3);
 
     NVDrv()
@@ -115,7 +115,7 @@ private:
         unsigned __int64 packet_key[0x40 / 8];
         char unk_data[0x138 - 0x40 - 56];
     };
-
+    
     struct request_readcr : request
     {
         NVFunction request_id;

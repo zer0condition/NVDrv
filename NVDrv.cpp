@@ -2,19 +2,19 @@
 
 uintptr_t NVDrv::MmGetPhysicalAddress(uintptr_t virtual_address)
 {
-    request_phys_addr Request{};
+	request_phys_addr Request{};
 
 	Request.request_id = NVFunction::phys_req;
 	Request.result_addr = 0;
 	Request.virtual_addr = virtual_address;
 
-    this->encrypt_payload(&Request, 0x38, Request.packet_key);
+	this->encrypt_payload(&Request, 0x38, Request.packet_key);
 
-    DWORD BytesReturned{};
+	DWORD BytesReturned{};
 
-    auto status = DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
+	auto status = DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 
-	if (!status) 
+	if (!status)
 	{
 		if (DEBUG)
 			printf("Failed VTOP for virtual address: %p!\n", (void*)virtual_address);
@@ -22,36 +22,36 @@ uintptr_t NVDrv::MmGetPhysicalAddress(uintptr_t virtual_address)
 		return 0;
 	}
 
-    return Request.result_addr;
+	return Request.result_addr;
 }
 
 BOOL NVDrv::ReadPhysicalMemory(uintptr_t physical_address, void* OUT res, int size)
 {
-    request_memcpy Request{};
+	request_memcpy Request{};
 	Request.request_id = NVFunction::phys_read;
 	Request.size = size;
 	Request.dst_addr = (__int64)res;
 	Request.src_addr = physical_address;
 
-    this->encrypt_payload(&Request, 0x38, Request.packet_key);
+	this->encrypt_payload(&Request, 0x38, Request.packet_key);
 
-    DWORD BytesReturned{};
-    return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
+	DWORD BytesReturned{};
+	return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 }
 
 BOOL NVDrv::WritePhysicalMemory(uintptr_t physical_address, void* IN  res, int size)
 {
-    request_memcpy Request{};
+	request_memcpy Request{};
 
 	Request.request_id = NVFunction::phys_write;
 	Request.size = size;
 	Request.dst_addr = physical_address;
 	Request.src_addr = (__int64)res;
 
-    this->encrypt_payload(&Request, 0x38, Request.packet_key);
+	this->encrypt_payload(&Request, 0x38, Request.packet_key);
 
-    DWORD BytesReturned{};
-    return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
+	DWORD BytesReturned{};
+	return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 }
 
 BOOL NVDrv::SwapReadContext(uintptr_t target_cr3)
@@ -184,15 +184,15 @@ DWORD NVDrv::ReadCr(int cr)
 	Request.cr_num = cr;
 	Request.unk_0 = 4;
 
-    this->encrypt_payload(&Request, 0x38, Request.packet_key);
+	this->encrypt_payload(&Request, 0x38, Request.packet_key);
 
-    DWORD BytesReturned{};
-    auto status = DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
+	DWORD BytesReturned{};
+	auto status = DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 
 	if (!status)
 		return 0;
 
-    return Request.result;
+	return Request.result;
 }
 
 BOOL NVDrv::WriteCr(int cr, DWORD64 value)
