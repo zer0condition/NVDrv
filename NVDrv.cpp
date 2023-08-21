@@ -257,7 +257,7 @@ BOOL NVDrv::WriteCr(int cr, DWORD64 value)
 *	Gets the file path of a running process by name
 *
 */
-std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
+std::wstring NVDrv::GetProcessPath(const std::wstring& process_name)
 {
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
@@ -268,7 +268,7 @@ std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
 	PROCESSENTRY32 processEntry = { sizeof(PROCESSENTRY32) };
 	if (Process32First(hSnapshot, &processEntry)) {
 		do {
-			if (_wcsicmp(processEntry.szExeFile, processName.c_str()) == 0) {
+			if (_wcsicmp(processEntry.szExeFile, process_name.c_str()) == 0) {
 				CloseHandle(hSnapshot);
 
 				HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, processEntry.th32ProcessID);
@@ -298,9 +298,9 @@ std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
 *	Returns the base address of a running process by name
 *
 */
-uintptr_t NVDrv::GetProcessBase(const std::wstring& processName)
+uintptr_t NVDrv::GetProcessBase(const std::wstring& process_name)
 {
-	return (uintptr_t)LoadLibrary(this->GetProcessPath(processName).c_str());
+	return (uintptr_t)LoadLibrary(this->GetProcessPath(process_name).c_str());
 }
 
 /*
