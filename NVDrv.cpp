@@ -295,7 +295,7 @@ std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
 }
 
 /*
-*	Return the base address of a running process
+*	Returns the base address of a running process by name
 *
 */
 uintptr_t NVDrv::GetProcessBase(const std::wstring& processName)
