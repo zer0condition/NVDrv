@@ -1,5 +1,10 @@
 #include "NVDrv.h"
 
+
+/*
+*	IO call to driver for MmGetPhysicalAddress
+* 
+*/
 uintptr_t NVDrv::MmGetPhysicalAddress(uintptr_t virtual_address)
 {
 	request_phys_addr Request{};
@@ -25,6 +30,11 @@ uintptr_t NVDrv::MmGetPhysicalAddress(uintptr_t virtual_address)
 	return Request.result_addr;
 }
 
+
+/*
+*	IO call to driver for physical memory memcpy read via MmMapIoSpace
+*
+*/
 BOOL NVDrv::ReadPhysicalMemory(uintptr_t physical_address, void* OUT res, int size)
 {
 	request_memcpy Request{};
@@ -40,6 +50,10 @@ BOOL NVDrv::ReadPhysicalMemory(uintptr_t physical_address, void* OUT res, int si
 	return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 }
 
+/*
+*	IO call to driver for physical memory memcpy write via MmMapIoSpace
+*
+*/
 BOOL NVDrv::WritePhysicalMemory(uintptr_t physical_address, void* IN  res, int size)
 {
 	request_memcpy Request{};
@@ -55,6 +69,10 @@ BOOL NVDrv::WritePhysicalMemory(uintptr_t physical_address, void* IN  res, int s
 	return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 }
 
+/*
+*	Swap reading context for TranslateLinearToPhysicalAddress
+*
+*/
 BOOL NVDrv::SwapReadContext(uintptr_t target_cr3)
 {
 	if (!target_cr3)
@@ -65,6 +83,10 @@ BOOL NVDrv::SwapReadContext(uintptr_t target_cr3)
 	return TRUE;
 }
 
+/*
+*	Get system directory base by walking PROCESSOR_START_BLOCK 
+*
+*/
 uintptr_t NVDrv::GetSystemCR3()
 {
 	for (int i = 0; i < 10; i++)
@@ -98,6 +120,10 @@ uintptr_t NVDrv::GetSystemCR3()
 	return 0;
 }
 
+/*
+*	Translates linear/virtual addresses to physical addresses with rightful directory base 
+*
+*/
 uintptr_t NVDrv::TranslateLinearToPhysicalAddress(uintptr_t virtual_address)
 {
 	unsigned short PML4 = (unsigned short)((virtual_address >> 39) & 0x1FF);
@@ -135,6 +161,10 @@ uintptr_t NVDrv::TranslateLinearToPhysicalAddress(uintptr_t virtual_address)
 	return (PTE & 0xFFFFFFFFFF000) + (virtual_address & 0xFFF);
 }
 
+/*
+*	Read virtual memory via translating virtual addresses to physical addresses
+*
+*/
 BOOL NVDrv::ReadVirtualMemory(uintptr_t address, LPVOID output, unsigned long size)
 {
 	if (!address || !size)
@@ -156,6 +186,10 @@ BOOL NVDrv::ReadVirtualMemory(uintptr_t address, LPVOID output, unsigned long si
 	return TRUE;
 }
 
+/*
+*	Write virtual memory via translating virtual addresses to physical addresses
+*
+*/
 BOOL NVDrv::WriteVirtualMemory(uintptr_t address, LPVOID data, unsigned long size)
 {
 	if (!address || !data)
@@ -177,6 +211,10 @@ BOOL NVDrv::WriteVirtualMemory(uintptr_t address, LPVOID data, unsigned long siz
 	return TRUE;
 }
 
+/*
+*	IO call to driver for __readcrX() intrinsic where X = (int cr)
+*
+*/
 DWORD NVDrv::ReadCr(int cr)
 {
 	request_readcr Request{};
@@ -196,6 +234,10 @@ DWORD NVDrv::ReadCr(int cr)
 	return Request.result;
 }
 
+/*
+*	IO call to driver for __writecrX(value) intrinsic where X = (int cr)
+*
+*/
 BOOL NVDrv::WriteCr(int cr, DWORD64 value)
 {
 	request_writecr Request{};
@@ -211,6 +253,10 @@ BOOL NVDrv::WriteCr(int cr, DWORD64 value)
 	return DeviceIoControl(this->nvhandle, ioctl_code, &Request, 0x138u, &Request, 0x138, &BytesReturned, 0i64);
 }
 
+/*
+*	Gets the file path of a running process by name
+*
+*/
 std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
 {
 	HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -248,11 +294,19 @@ std::wstring NVDrv::GetProcessPath(const std::wstring& processName)
 	return L"";
 }
 
+/*
+*	Return the base address of a running process
+*
+*/
 uintptr_t NVDrv::GetProcessBase(const std::wstring& processName)
 {
 	return (uintptr_t)LoadLibrary(this->GetProcessPath(processName).c_str());
 }
 
+/*
+*	Bruteforcing to get the directory base of a process with it's base address
+*
+*/
 uintptr_t NVDrv::GetProcessCR3(uintptr_t base_address)
 {
 	if (!base_address) {
