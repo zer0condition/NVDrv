@@ -1,15 +1,15 @@
 @echo off
 cd %~dp0
 
-xcopy nvaudio.sys C:\
-sc create nvaudio binpath=C:\nvaudio.sys type=kernel
-sc start nvaudio
+xcopy nvoclock.sys C:\
+sc create nvoclock binpath=C:\nvoclock.sys type=kernel
+sc start nvoclock
 
 echo Press any key to unload driver
 pause
 
-sc stop nvaudio
-sc delete nvaudio
-del /f C:\nvaudio.sys
+sc stop nvoclock
+sc delete nvoclock
+del /f C:\nvoclock.sys
 
 pause
