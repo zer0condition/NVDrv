@@ -72,7 +72,9 @@ int main()
 
 	/*
 	*	Disable KVA shadowing before continuing with this
+	* 
 	*/
+
 
 	/*
 	auto SystemCR3 = NV->GetSystemCR3();
