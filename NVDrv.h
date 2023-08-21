@@ -20,12 +20,12 @@ public:
     /*
     *	Gets the file path of a running process by name
     */
-    std::wstring            GetProcessPath(const std::wstring& processName);
+    std::wstring            GetProcessPath(const std::wstring& process_name);
 
     /*
     *	Returns the base address of a running process by name
     */
-    uintptr_t               GetProcessBase(const std::wstring& processName);
+    uintptr_t               GetProcessBase(const std::wstring& process_name);
 
 
     /*
